@@ -1,0 +1,32 @@
+screenrecord调用过程简单描述：
+使用安卓标准的api（mediacodec），可以进行编码和解码。
+
+mediacodec会使用libstagefright.so
+
+libstagefright.so会使用libstagefright_omx.so;libstagefright_omx.so会将libstagefrighthw.so以plugin的方式加入进来，同时也会加入一些软编解码库libstagefright_soft_amrdec.so
+编码顺序及类型定义在 device/amlogic/m201/media_codecs.xml中描述。
+
+
+（1）libstagefrighthw.so为硬件厂商实现的硬编码和硬解码库，在hardware/amlogic/libstagefrighthw中。
+（2）libstagefright.so在frameworks/av/media/libstagefright中生成。
+具体的过程可以参看frameworks/av/media/libstagefright/中的相关源文件。
+
+
+uboot待机
+appf及arc部分 编译简单描述
+（1）arch/arm/cpu/aml_meson/m8b/下的Makefile会调用arch/arm/cpu/aml_meson/m8b/firmware/arc_power/Makefile编译出arc_code.dat。
+（2）arch/arm/cpu/aml_meson/m8b/下的Makefile会在调用arch/arm/cpu/aml_meson/m8b/firmware/appf/Makefile编译出power_firmware.dat(arch/arm/cpu/aml_meson/m8b/firmware/appf/platform/a9-e/bpower.c会 include “arc_code.dat”)。
+（3）arch/arm/cpu/aml_meson/m8b/目录下的firmwareld.c编译时依赖 power_firmware.dat
+（4）最终他们都编译到uboot中。
+
+uboot调用过程：
+（1）初始化硬件
+（2）main_loop中调用init_suspend_firmware（）将appf固件代码复制到内存指定位置；
+（3）引导内核。
+
+
+内核待机过程
+（1）进入内核待机流程
+（2）进入平台相关待机部分（arch/arm/mach-meson8b/power_suspend.c）
+（3）通过调用进入到appf固件代码中，appf进入待机流程，运行arch/arm/cpu/aml_meson/m8b/firmware/appf/platform/a9-eb/power.c中的run_arc_program程序，将arc部分固件代码复制到内存指定位置。
+（4）进入到arc程序部分循环，等待待机触发唤醒。
