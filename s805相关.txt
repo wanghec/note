@@ -49,3 +49,7 @@ DTC (device tree compiler)
 Device Tree Blob (.dtb)
 .dtb是.dts被DTC编译后的二进制格式的Device Tree描述，可由Linux内核解析。通常在我们为电路板制作NAND、SD启动image时，会为.dtb文件单独留下一个很小的区域以存放之，之后bootloader在引导kernel的过程中，会先读取该.dtb到内存。
 
+amlogic平台cpu freq相关
+（1）amlogic的dts部分在common/arch/arm/boot/dts/amlogic中，它里面全是*.dtd，不是标准的*.dts；他是利用scripts/amlogic/aml_dtd.sh将*.dtd转换成*.dtb。
+（2）s805使用的dtd表为meson8b_m201_1G.dtd，其中与dvfs相关的表为dvfs_table和cs_voltage_table。
+（3）频率调整注意：升高频率，先增加cpu核电压，在设置cpu频率；降低频率，先设置cpu频率，在降低核电压。
