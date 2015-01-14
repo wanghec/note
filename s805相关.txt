@@ -53,3 +53,16 @@ amlogic平台cpu freq相关
 （1）amlogic的dts部分在common/arch/arm/boot/dts/amlogic中，它里面全是*.dtd，不是标准的*.dts；他是利用scripts/amlogic/aml_dtd.sh将*.dtd转换成*.dtb。
 （2）s805使用的dtd表为meson8b_m201_1G.dtd，其中与dvfs相关的表为dvfs_table和cs_voltage_table。
 （3）频率调整注意：升高频率，先增加cpu核电压，在设置cpu频率；降低频率，先设置cpu频率，在降低核电压。
+
+cpu中smp
+cpu核的开关控制调用过程简述：
+（1）内核中的通用代码，在 arch/arm/kernel/smp.c
+（2）平台相关代码在 arch/arm/mach-meson8b/smp.c
+（3）通用代码中的smp.c会调用平台相关中的smp.c中相关函数。
+
+在Linux系统中，对于多核的ARM芯片而言，Bootrom代码中，CPU0会率先起来，引导Bootloader和Linux内核执行，而其他的核则在上电时Bootrom一般将自身置于WFI或者WFE状态，并等待CPU0给其发CPU核间中断（IPI）或事件（一般透过SEV指令）唤醒之。wfi（wait for interrupt） wfe(wait for event)
+
+Cache的一致性也只能通过其SCU（Snoop Control Unit）在这4个Core之间实现。
+
+__atags_pointer:目前的kernel支持旧的tag list的方式，同时也支持device tree的方式。r2可能是device tree binary file的指针（bootloader要传递给内核之前要copy到memory中），也可以能是tag list的指针。在ARM的汇编部分的启动代码中（主要是head.S和head-common.S），machine type ID和指向DTB或者atags的指针被保存在变量__machine_arch_type和__atags_pointer中，这么做是为了后续c代码进行处理。
+
