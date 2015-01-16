@@ -31,6 +31,7 @@ uboot调用过程：
 （3）通过调用进入到appf固件代码中，appf进入待机流程，运行arch/arm/cpu/aml_meson/m8b/firmware/appf/platform/a9-eb/power.c中的run_arc_program程序，将arc部分固件代码复制到内存指定位置。
 （4）进入到arc程序部分循环，等待待机触发唤醒。
 
+dtb相关
 ARM 社区一贯充斥的大量垃圾代码导致Linus盛怒，因此社区在2011年到2012年进行了大量的工作。ARM Linux开始围绕Device  Tree展开，Device  Tree有自己的独立的语法，它的源文件为.dts，编译后得到.dtb，Bootloader在引导Linux内核的时候会将.dtb地址告知内核。之 后内核会展开Device  Tree并创建和注册相关的设备，因此arch/arm/mach-xxx和arch/arm/plat-xxx中大量的用于注册platform、 I2C、SPI板级信息的代码被删除，而驱动也以新的方式和.dts中定义的设备结点进行匹配。
 
   Device Tree组成和结构
@@ -49,6 +50,24 @@ DTC (device tree compiler)
 Device Tree Blob (.dtb)
 .dtb是.dts被DTC编译后的二进制格式的Device Tree描述，可由Linux内核解析。通常在我们为电路板制作NAND、SD启动image时，会为.dtb文件单独留下一个很小的区域以存放之，之后bootloader在引导kernel的过程中，会先读取该.dtb到内存。
 
+__atags_pointer:kernel支持旧的tag list的方式，同时也支持device tree的方式。r2可能是device tree binary file的指针（bootloader要传递给内核之前要copy到memory中），也可以能是tag list的指针。在ARM的汇编部分的启动代码中（主要是head.S和head-common.S），machine type ID和指向DTB或者atags的指针被保存在变量__machine_arch_type和__atags_pointer中，这么做是为了后续c代码进行处理。可以参看内核中的文档，文档在/documentation/arm/booting.txt。
+
+s805平台，将*.dtb拼接到了boot.img中，拼接顺序 uImage+ramdisk.img+*.dtb，具体可以参见/device/amlogic/m201/quick_build_kernel.sh中的生成命令。
+uboot中会读取dtb文件，放到指定的内存地址上，将内存地址放到 R2 寄存器中。如没有dtb内容，则将tag list传递给内核。
+
+Device Tree带来的改变
+1、ARM的核心代码仍然保存在arch/arm目录下
+2、ARM SoC core architecture code保存在arch/arm目录下
+3、ARM SOC的周边外设模块的驱动保存在drivers目录下
+4、ARM SOC的特定代码在arch/arm/mach-xxx目录下
+5、ARM SOC board specific的代码被移除，由Device Tree机制来负责传递硬件拓扑和硬件资源信息。 
+
+1、识别platform的信息
+2、runtime的配置参数
+3、设备的拓扑结构以及特性
+对于嵌入式系统，在系统启动阶段，bootloader会加载内核并将控制权转交给内核，此外，还需要把上述的三个参数信息传递给kernel，以便kernel可以有较大的灵活性。在linux kernel中，Device Tree的设计目标就是如此。 
+
+
 amlogic平台cpu freq相关
 （1）amlogic的dts部分在common/arch/arm/boot/dts/amlogic中，它里面全是*.dtd，不是标准的*.dts；他是利用scripts/amlogic/aml_dtd.sh将*.dtd转换成*.dtb。
 （2）s805使用的dtd表为meson8b_m201_1G.dtd，其中与dvfs相关的表为dvfs_table和cs_voltage_table。
@@ -64,5 +83,8 @@ cpu核的开关控制调用过程简述：
 
 Cache的一致性也只能通过其SCU（Snoop Control Unit）在这4个Core之间实现。
 
-__atags_pointer:目前的kernel支持旧的tag list的方式，同时也支持device tree的方式。r2可能是device tree binary file的指针（bootloader要传递给内核之前要copy到memory中），也可以能是tag list的指针。在ARM的汇编部分的启动代码中（主要是head.S和head-common.S），machine type ID和指向DTB或者atags的指针被保存在变量__machine_arch_type和__atags_pointer中，这么做是为了后续c代码进行处理。
+
+
+
+
 
