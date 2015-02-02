@@ -129,4 +129,45 @@ Cache的一致性也只能通过其SCU（Snoop Control Unit）在这4个Core之�
 用户模式的Linux(UML：User-Mode Linux)是指将Linux作为一个独立的、可移植的Linux内核而创建，其实现包含在子目录arch/um中。然而，它并不是运行在某种新的硬件之上，而是运行在基于Linux系统调用接口所实现的虚拟机之上。因此用户模式的Linux可以使得Linux内核成为一个运行在Linux系统之上的、独立的用户模式进程。
 将一个内核的副本当做用户模式下的进程来运行有多个优势。首先其运行在一个受约束的虚拟处理器上，所以有错误的内核不会破坏“真正”的系统；其次对软/硬件的不同配置可以在相同的框架下进行不同的尝试；更重要的是对Linux内核开发人员来说，可以轻易利用gdb对用户模式Linux进行调试，因为归根到底它始终是一个进程。因此利用UML一方面可以加快Linux内核的开发过程；另一方面也有助于我们对Linux内核运行机制的了解。
 
-
+mx的视频比例调整，通过代码中的videoplayer查看得出，当为3D模式时会使用如下相关代码如下
+int SYS_set_3D_view_mode(SYS_3D_VIEW_MODE_SET vmode){
+	int ret = -1;
+	int ppmgrfd = open("/dev/ppmgr", O_RDWR);
+	if(ppmgrfd<0){
+		LOGE("VideoPlayer open ppmgr, error (%s)\n", strerror(errno));
+		return ppmgrfd;		
+	}	
+	switch(vmode){
+		case SYS_3D_VIEW_NORMAL:
+			ret = ioctl(ppmgrfd, PPMGR_IOC_VIEW_MODE, SYS_3D_VIEW_NORMAL);
+			break;
+		case SYS_3D_VIEW_FULL:
+			ret = ioctl(ppmgrfd, PPMGR_IOC_VIEW_MODE, SYS_3D_VIEW_FULL);
+			break;
+		case SYS_3D_VIEW_4_3:
+			ret = ioctl(ppmgrfd, PPMGR_IOC_VIEW_MODE, SYS_3D_VIEW_4_3);
+			break;
+		case SYS_3D_VIEW_16_9:
+			ret = ioctl(ppmgrfd, PPMGR_IOC_VIEW_MODE, SYS_3D_VIEW_16_9);
+			break;
+		case SYS_3D_VIEW_NO_SCALEUP:
+			ret = ioctl(ppmgrfd, PPMGR_IOC_VIEW_MODE,SYS_3D_VIEW_NO_SCALEUP);
+			break;
+		default:
+			LOGE("invalid case,never see this line,vmode value:%d\n",vmode);
+			break;
+	}
+	if(ret < 0)
+		LOGE("VideoPlayer SYS_set_3D_view_mode function error");
+			
+	if(ppmgrfd>0){
+		close(ppmgrfd);
+	}
+	return 0;
+}
+当为普通时，则使用playservice/screenmode.java中代码进行设置，操作 /sys/class/video/screen_mode 即可。对应值
+public static final int NORMAL = 0;
+	public static final int FULLSTRETCH = 1;
+	public static final int RATIO4_3 = 2;
+	public static final int RATIO16_9 = 3;
+public static final int NORMAL_NOSCALEUP = 4;
