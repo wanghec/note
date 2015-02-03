@@ -171,3 +171,7 @@ public static final int NORMAL = 0;
 	public static final int RATIO4_3 = 2;
 	public static final int RATIO16_9 = 3;
 public static final int NORMAL_NOSCALEUP = 4;
+
+内核生成过程
+vmlinux(ELF目标文件，严格意义上内核)->objcopy->image(二进制目标文件，已去除符号、标记、注释的二进制镜像)->gzip->piggy.gz->asm->vmlinux(piggy.o,misc.o,big_endian.o,head.o,etc.)此处命名不太合适->zImage(针对uboot来说，它是未压缩的，因为uboot无法解压)
+
