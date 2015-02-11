@@ -1,0 +1,97 @@
+谷歌的ip地址
+http://173.194.121.28/
+
+ssh-keygen -t rsa
+<高杰(8274)> 2013年11月29日 星期五 14时19分37秒
+~/.ssh
+<高杰(8274)> 2013年11月29日 星期五 14时19分47秒
+id_rsa.pub 
+<高杰(8274)> 2013年11月29日 星期五 14时19分59秒
+192.168.7.32:8080
+<高杰(8274)> 2013年11月29日 星期五 14时20分22秒
+wanghc:wanghc123
+
+
+git clone ssh://wanghc@192.168.7.32:29418/OTT/kernel
+git clone ssh://wanghc@192.168.7.32:29418/OTT/u-boot
+git clone ssh://wanghc@192.168.7.32:29418/OTT/rootfs
+git clone ssh://wanghc@192.168.7.32:29418/OTT/recovery
+
+git clone ssh://wanghc@192.168.7.32:29418/GateWay/boot
+git clone ssh://wanghc@192.168.7.32:29418/GateWay/kernel
+git clone ssh://wanghc@192.168.7.32:29418/GateWay/rootfs
+git clone ssh://wanghc@192.168.7.32:29418/GateWay/loader
+
+git add .  将所有文件添加到git
+
+修改.gitconfig,指定编辑器
+
+user10@user10-desktop:~/桌面/myuser/amlogic_git/kernel$ git commit -a   提交代码（还在本地）
+
+gitg图形化查看。
+
+git log  查看提交日志
+
+
+git reset --hard 9a6855160d9cd55c896beee62a20727f8eef5172  回退到该版本
+
+git push origin master 提交到服务器
+
+
+公司git服务器
+192.168.1.4:8088
+
+git clone ssh://wanghc@192.168.1.4:29418/platforms/bcm/7583-chip/bcm-boot
+王贺超 git 用户名  wanghc
+           密码是  ccdt2014
+
+分支： V103R002ChongqingGateway
+
+<王贺超-8327> 2014年03月13日 星期四 14时53分50秒
+tets
+<杨乾恒-8108> 2014年03月13日 星期四 14时55分36秒
+产生公私密钥对
+在Linux的shell下使用下面命令 
+$ ssh-keygen -t rsa 
+注意： 
+根据提示直接回车即可，不需要输入参数。 
+将在路径~/.ssh下生成两个密钥。 注意看提示，如果生成文件不再.ssh目录下，需要移动至.ssh目录。 
+id_rsa id_rsa.pub 
+第一个是私钥，请保管好，不要给其他任何人。 第二个是公钥，将需要提供给Review服务器以验证身份。 
+公钥的使用 
+           $cd .ssh 
+$cat id_rsa.pub 将所显示内容复制 
+$ssh-add 
+
+Git配置 
+初始化Review服务器个人信息 
+1.登录review服务器：http://vc.cn:8088 
+2.点击右上角 sign in。 
+3.输入用户名和密码并确认，同wiki，mantis等。 
+4.在“Add SSH Public Key”下面粘贴自己的公钥(~/.ssh/id_rsa.pub)中的内容 
+5.如果在这一步没有设的话，可以从settings->SSH Public Keys里面添加。 
+6.完成这一步才会有权限访问git仓库。 
+配置本地个人信息 
+必须配置正确的信息，否则无法提交代码，配置一次即可。 
+1.git config --global user.name [中文名字] 
+2.git config --global user.email [email-address] 
+example: 
+1.git config --global user.name dummy 
+2.git config --global user.email wanghc@cyclecentury.com 
+如果个人系统的用户名非LDAP用户名的话，需要进行下面操作,把LDAP的用户名加入到配置文件中 
+echo User [ldap-name] >> ~/.ssh/config 
+example: 
+echo User dummy >> ~/.ssh/config 
+
+
+./repo  init -u  ssh://wanghc@192.168.7.32:29418/OTT/8726MX/manifests -b master
+./repo sync
+
+./repo  forall -c git tag timehold-20140504
+./repo forall -c git push am8726 --tags
+
+./repo forall -c git push am8726 master 
+
+git branch master
+git branch -D master
+git branch master -t a20/master
