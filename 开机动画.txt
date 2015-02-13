@@ -1,0 +1,40 @@
+开机动画
+
+Android Animation开机动画的优化
+    使用bootanimation程序显示开机画面，如需修改开机画面，需要修改源码
+    b）代码
+    frameworks/base/cmds/bootanimation/*
+    frameworks/base/core/res/assets/images/Android-logo*
+    2）Android 2.0及之后
+    a）说明
+    使用bootanimation程序显示开机画面，如需修改开机画面，不用修改代码，只需按格式要求做bootanimation.zip包，放在系统的 /system/media目录中，或/data/local目录中即可，两个目录下都存在时，优先使用/data/local下的
+    b）代码
+    frameworks/base/cmds/bootanimation/*
+    frameworks/base/core/res/assets/images*
+
+
+
+1.其开机动画是由root/init.rc中的bootanimation启动的。内容如下：
+service bootanim /system/bin/bootanimation
+    class main
+    user graphics
+    group graphics
+    disabled
+    oneshot
+
+2.bootanimation实现的代码在frameworks/base/cmds/bootanimation中。
+其中
+bootanimation.cpp中提到
+#define USER_BOOTANIMATION_FILE "/data/local/bootanimation.zip"
+#define SYSTEM_BOOTANIMATION_FILE "/system/media/bootanimation.zip"
+#define SYSTEM_ENCRYPTED_BOOTANIMATION_FILE "/system/media/bootanimation-encrypted.zip"
+#define USER_SHUTDOWN_BOOTANIMATION_FILE  "/data/local/shutdownanimation.zip"
+#define SYSTEM_SHUTDOWN_BOOTANIMATION_FILE "/system/media/shutdownanimation.zip"
+#define EXIT_PROP_NAME "service.bootanim.exit"
+
+3.测试结果
+当/data/local中无 bootanimation.zip 的时候，启动时会使用system/media下面的 bootanimation.zip。
+当/data/local中存在 bootanimation.zip（权限需为644）的时候，启动时会使用/data/local中的bootanimation.zip。
+
+
+
